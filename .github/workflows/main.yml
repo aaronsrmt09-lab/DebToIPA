@@ -17,6 +17,9 @@ jobs:
       - name: Download DEB
         run: curl -L -o app.deb "${{ github.event.inputs.deb_url }}"
 
+      - name: Install dpkg tool
+        run: brew install dpkg
+
       - name: Extract DEB and Build IPA
         run: |
           mkdir extract
