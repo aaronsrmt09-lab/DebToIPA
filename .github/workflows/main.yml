@@ -1,0 +1,33 @@
+name: Convert DEB to IPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      deb_url:
+        description: 'Enlace directo del archivo .deb'
+        required: true
+
+jobs:
+  convert:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download DEB
+        run: curl -L -o app.deb "${{ github.event.inputs.deb_url }}"
+
+      - name: Extract DEB and Build IPA
+        run: |
+          mkdir extract
+          dpkg-deb -x app.deb extract/
+          mkdir -p Payload
+          # Busca la carpeta .app dentro del deb extraído y la mueve a Payload
+          find extract -type d -name "*.app" -exec cp -r {} Payload/ \;
+          zip -r app.ipa Payload
+          
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: converted-ipa
+          path: app.ipa
